@@ -1,13 +1,13 @@
 #ifndef __SEGO_MOMENT_H
 #define __SEGO_MOMENT_H
 
-#include <time.h>
-#include "enums.h"
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+#include <time.h>
+#include "enums.h"
 
     /*
      * @brief   Sleeps.
