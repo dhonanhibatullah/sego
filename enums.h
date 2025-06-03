@@ -24,6 +24,7 @@ extern "C"
 
     typedef enum
     {
+        SG_TIME_NS = 1L,
         SG_TIME_US = 1000L,
         SG_TIME_MS = 1000000L,
         SG_TIME_S = 1000000000L
