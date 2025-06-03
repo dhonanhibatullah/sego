@@ -20,6 +20,10 @@ extern "C"
     } sgChan;
 
     /*
+     * @brief   Makes new channel.
+     * @param   itemSize the item of the transported data in the channel
+     * @param   bufferSize the channel's buffer size
+     * @return  the pointer to the channel instance
      */
     sgChan *sgChanMake(size_t itemSize, size_t bufferSize)
     {
@@ -53,6 +57,10 @@ extern "C"
     }
 
     /*
+     * @brief   Sends data to the channel.
+     * @param   ch the channel instance
+     * @param   data the data
+     * @return  `SG_ERR_NULLPTR` if one argument is `NULL`. `SG_ERR_ALLOC` if memory allocation is somehow failed. `SG_OK` if ok.
      */
     sgReturnType sgChanIn(sgChan *ch, void *data)
     {
@@ -71,6 +79,11 @@ extern "C"
     }
 
     /*
+     * @brief   Retrieves data from the channel.
+     * @param   ch the channel instance
+     * @param   buf the buffer to hold the data
+     * @return  `SG_ERR_NULLPTR` if one argument is `NULL`. `SG_OK` if ok.
+     * @note    This function is blocking.
      */
     sgReturnType sgChanOut(sgChan *ch, void *buf)
     {
@@ -89,6 +102,12 @@ extern "C"
     }
 
     /*
+     * @brief   Retrieves data from the channel wit timeout.
+     * @param   ch the channel instance
+     * @param   buf the buffer to hold the data
+     * @param   timeout the duration until timeout
+     * @return  `SG_ERR_NULLPTR` if one argument is `NULL`. `SG_TIMEOUT` if timeout. `SG_OK` if ok.
+     * @note    This function is blocking up until timeout. Multiply the timeout with the desired time unit, e.g. 500L * `SG_TIME_MS` for 500ms timeout duration.
      */
     sgReturnType sgChanOutTimed(sgChan *ch, void *buf, long timeout)
     {
@@ -128,6 +147,9 @@ extern "C"
     }
 
     /*
+     * @brief   Destroys the channel instance.
+     * @param   ch the channel instance
+     * @return  none
      */
     void sgChanDestroy(sgChan *ch)
     {

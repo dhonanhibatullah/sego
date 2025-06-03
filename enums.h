@@ -19,7 +19,8 @@ extern "C"
     typedef enum
     {
         SG_CTX_LOWERED,
-        SG_CTX_RAISED
+        SG_CTX_RAISED,
+        SG_CTX_ERROR
     } sgContextFlag;
 
     typedef enum

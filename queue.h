@@ -27,6 +27,11 @@ extern "C"
     } sgQueue;
 
     /*
+     * @brief   Creates a queue with fixed item size.
+     * @param   itemSize the size for each item
+     * @param   bufferSize the size of the queue
+     * @return  the pointer to the queue (`sgQueue`) instance
+     * @note    If the queue is full when a new item is being queued, the earliest one gets dequeued.
      */
     sgQueue *sgQueueCreate(size_t itemSize, size_t bufferSize)
     {
@@ -46,6 +51,10 @@ extern "C"
     }
 
     /*
+     * @brief   Queues new item.
+     * @param   q the queue instance
+     * @param   data the new item
+     * @return  `SG_ERR_NULLPTR` if one argument is a `NULL`. `SG_ERR_ALLOC` if a new memory allocation is somehow failed. `SG_OK` if ok.
      */
     sgReturnType sgQueueQueue(sgQueue *q, void *data)
     {
@@ -94,6 +103,10 @@ extern "C"
     }
 
     /*
+     * @brief   Dequeues the first item.
+     * @param   q the queue instance
+     * @param   buf buffer to hold the item
+     * @return  `SG_ERR_NULLPTR` if one argument is a `NULL`. `SG_NOTHING` if queue is empty. `SG_OK` if ok.
      */
     sgReturnType sgQueueDequeue(sgQueue *q, void *buf)
     {
@@ -117,6 +130,9 @@ extern "C"
     }
 
     /*
+     * @brief   Destroys the queue instance.
+     * @param   q the queue instance
+     * @return  none
      */
     void sgQueueDestroy(sgQueue *q)
     {

@@ -9,6 +9,12 @@ extern "C"
 {
 #endif
 
+    /*
+     * @brief   Sleeps.
+     * @param   time sleep duration
+     * @return  none
+     * @note    Multiply the time with the desired time unit, e.g. 500L * `SG_TIME_MS` for 500ms sleep.
+     */
     void sgMomentSleep(long time)
     {
         struct timespec ts = {

@@ -18,6 +18,11 @@ extern "C"
         sgContextFlag flag;
     } sgContext;
 
+    /*
+     * @brief   Creates new context.
+     * @param   none
+     * @return  the pointer to the context (`sgContext`) instance
+     */
     sgContext *sgContextCreate()
     {
         sgContext *ctx = (sgContext *)malloc(sizeof(sgContext));
@@ -34,6 +39,11 @@ extern "C"
         return ctx;
     }
 
+    /*
+     * @brief   Raises the context flag.
+     * @param   ctx the context instance
+     * @return  `SG_ERR_NULLPTR` if the argument is a `NULL`. `SG_OK` if ok.
+     */
     sgReturnType sgContextRaise(sgContext *ctx)
     {
         if (ctx == NULL)
@@ -46,6 +56,11 @@ extern "C"
         return SG_OK;
     }
 
+    /*
+     * @brief   Lowers the context flag.
+     * @param   ctx the context instance
+     * @return  `SG_ERR_NULLPTR` if the argument is a `NULL`. `SG_OK` if ok.
+     */
     sgReturnType sgContextLower(sgContext *ctx)
     {
         if (ctx == NULL)
@@ -58,10 +73,15 @@ extern "C"
         return SG_OK;
     }
 
+    /*
+     * @brief   Retrieves the context flag.
+     * @param   ctx the context instance
+     * @return  `SG_CTX_ERROR` if the argument is a `NULL`. Otherwise, `SG_CTX_LOWERED` or `SG_CTX_RAISED`.
+     */
     sgContextFlag sgContextGetFlag(sgContext *ctx)
     {
         if (ctx == NULL)
-            return 0xFF;
+            return SG_CTX_ERROR;
 
         pthread_mutex_lock(&ctx->lock);
         sgContextFlag flag = ctx->flag;
@@ -69,6 +89,11 @@ extern "C"
         return flag;
     }
 
+    /*
+     * @brief   Destroys the context instance.
+     * @param   ctx the context instance
+     * @return  none
+     */
     void sgContextDestroy(sgContext *ctx)
     {
         if (ctx == NULL)
@@ -85,6 +110,11 @@ extern "C"
         struct timespec ts;
     } __sgContextToggleAfterArgs;
 
+    /*
+     * @brief   Context's flag toggling routine.
+     * @param   a the routine argument
+     * @return  a void pointer
+     */
     void *__sgContextToggleAfterRoutine(void *a)
     {
         __sgContextToggleAfterArgs *args = (__sgContextToggleAfterArgs *)a;
@@ -99,6 +129,13 @@ extern "C"
         return NULL;
     }
 
+    /*
+     * @brief   Raises context's flag after a period of time.
+     * @param   ctx the context instance
+     * @param   time the time
+     * @return  `SG_ERR_NULLPTR` if the argument is a `NULL`. `SG_ERR_ALLOC` if memory allocation is somehow failed. `SG_ERR_PTHREAD` if there is a problem with `pthread`. `SG_OK` if ok.
+     * @note    Multiply the time with the desired time unit, e.g. 500L * `SG_TIME_MS` for flag raised after 500ms.
+     */
     sgReturnType sgContextRaiseAfter(sgContext *ctx, long time)
     {
         if (ctx == NULL)
@@ -123,6 +160,13 @@ extern "C"
         return SG_OK;
     }
 
+    /*
+     * @brief   Lowers context's flag after a period of time.
+     * @param   ctx the context instance
+     * @param   time the time
+     * @return  `SG_ERR_NULLPTR` if the argument is a `NULL`. `SG_ERR_ALLOC` if memory allocation is somehow failed. `SG_ERR_PTHREAD` if there is a problem with `pthread`. `SG_OK` if ok.
+     * @note    Multiply the time with the desired time unit, e.g. 500L * `SG_TIME_MS` for flag lowered after 500ms.
+     */
     sgReturnType sgContextLowerAfter(sgContext *ctx, long time)
     {
         if (ctx == NULL)
