@@ -172,6 +172,7 @@ int main()
 
 ## **B. To be Developed**
 
-1. `select {}` mechanism
-2. many other Go features
-3. libraries based on **sego** for building apps
+1. windows support
+2. `select {}` mechanism
+3. many other Go features
+4. libraries based on **sego** for building apps
