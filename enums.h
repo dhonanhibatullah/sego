@@ -1,5 +1,5 @@
-#ifndef __SEGO_TYPES_H
-#define __SEGO_TYPES_H
+#ifndef __SEGO_ENUMS_H
+#define __SEGO_ENUMS_H
 
 #ifdef __cplusplus
 extern "C"
