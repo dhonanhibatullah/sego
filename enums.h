@@ -11,6 +11,7 @@ extern "C"
         SG_OK,
         SG_NOTHING,
         SG_TIMEOUT,
+        SG_QUEUE_FULL,
         SG_ERR_NULLPTR,
         SG_ERR_ALLOC,
         SG_ERR_PTHREAD

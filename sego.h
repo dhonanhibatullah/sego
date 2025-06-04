@@ -12,6 +12,7 @@ extern "C"
 #include "queue.h"
 #include "channel.h"
 #include "context.h"
+#include "select.h"
 #include "moment.h"
 #include "handler.h"
 
@@ -19,8 +20,8 @@ extern "C"
 
     /*
      * @brief   Starts sego handler.
-     * @param   None
-     * @return  None
+     * @param   none
+     * @return  None.
      */
     void sgInit()
     {
@@ -31,24 +32,30 @@ extern "C"
             exit(EXIT_FAILURE);
         }
 
-        sgh->startCh = sgChanMake(sizeof(__sgRoutineWrapperArgs), 8);
+        sgh->startCh = sgChanMake(sizeof(__sgRoutineWrapperArgs), 4);
         if (sgh->startCh == NULL)
         {
-            perror("Failed to allocate memory for Sego handler start channel.");
+            perror("Failed to allocate memory for Sego handler's start channel.");
+            free(sgh);
             exit(EXIT_FAILURE);
         }
 
-        sgh->stopCh = sgChanMake(sizeof(pthread_t), 8);
+        sgh->stopCh = sgChanMake(sizeof(pthread_t), 4);
         if (sgh->stopCh == NULL)
         {
-            perror("Failed to allocate memory for Sego handler stop channel.");
+            perror("Failed to allocate memory for Sego handler's stop channel.");
+            sgChanDestroy(sgh->startCh);
+            free(sgh);
             exit(EXIT_FAILURE);
         }
 
-        sgh->closeCh = sgChanMake(sizeof(uint8_t), 1);
-        if (sgh->closeCh == NULL)
+        sgh->closeCtx = sgContextCreate();
+        if (sgh->closeCtx == NULL)
         {
-            perror("Failed to allocate memory for Sego handler close channel.");
+            perror("Failed to allocate memory for Sego handler's close context.");
+            sgChanDestroy(sgh->startCh);
+            sgChanDestroy(sgh->stopCh);
+            free(sgh);
             exit(EXIT_FAILURE);
         }
 
@@ -56,6 +63,10 @@ extern "C"
 
         if (pthread_create(&sgh->sgHandlerThread, NULL, sgHandlerRoutine, NULL) != 0)
         {
+            sgChanDestroy(sgh->startCh);
+            sgChanDestroy(sgh->stopCh);
+            sgContextDestroy(sgh->closeCtx);
+            free(sgh);
             perror("Failed to start Sego handler routine.");
             exit(EXIT_FAILURE);
         }
@@ -63,13 +74,13 @@ extern "C"
 
     /*
      * @brief   Stops sego handler.
-     * @param   None
-     * @return  None
+     * @param   none
+     * @return  None.
      */
     void sgClose()
     {
         uint8_t term = 0xFF;
-        sgChanIn(sgh->closeCh, &term);
+        sgContextRaise(sgh->closeCtx);
         pthread_join(sgh->sgHandlerThread, NULL);
         free(sgh);
     }
@@ -78,7 +89,7 @@ extern "C"
      * @brief   Starts a sego routine.
      * @param   fn the routine function
      * @param   arg the argument to be passed to the routine
-     * @return  None
+     * @return  None.
      */
     void sego(sgRoutine fn, void *arg)
     {
