@@ -12,6 +12,7 @@ extern "C"
 #include "queue.h"
 #include "channel.h"
 #include "context.h"
+#include "select.h"
 #include "moment.h"
 #include "handler.h"
 
