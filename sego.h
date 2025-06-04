@@ -20,8 +20,8 @@ extern "C"
 
     /*
      * @brief   Starts sego handler.
-     * @param   None
-     * @return  None
+     * @param   none
+     * @return  None.
      */
     void sgInit()
     {
@@ -64,8 +64,8 @@ extern "C"
 
     /*
      * @brief   Stops sego handler.
-     * @param   None
-     * @return  None
+     * @param   none
+     * @return  None.
      */
     void sgClose()
     {
@@ -79,7 +79,7 @@ extern "C"
      * @brief   Starts a sego routine.
      * @param   fn the routine function
      * @param   arg the argument to be passed to the routine
-     * @return  None
+     * @return  None.
      */
     void sego(sgRoutine fn, void *arg)
     {
