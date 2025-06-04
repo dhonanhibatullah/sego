@@ -1,14 +1,24 @@
 # **sego**
 
-**sego** is a Go-inspired framework for the C programming language, designed to bring lightweight concurrency and simplicity to your C projects. It’s a header-only library — just include and start coding!
+**sego** (pronounced /sə:ɡô/) is a Go-inspired framework for the C programming language, designed to bring lightweight concurrency and simplicity to your C projects. It’s a header-only library — just include and start coding!
 
-Built on native thread handling using pthread (currently Linux-only), **sego** offers seamless routine management by integrating the excellent [uthash](https://github.com/troydhanson/uthash) library under the hood. Windows support is on the roadmap.
+Built on native thread handling using pthread (currently Linux-only), **sego** offers seamless routine management by integrating the [uthash](https://github.com/troydhanson/uthash) library. Windows support is on the roadmap.
 
 🚧 **sego** is still under active development — stay tuned for updates!
 
-## **A. Examples**
+## **A. Why You Should Try sego?**
 
-### **0. Compiling**
+1. ⚡ **Blazing Fast & Feather-Light**
+
+   No garbage collector. No goroutine scheduler. Just pure speed—leaner and meaner than Go!
+
+2. 🛠️ **C/C++ Fans, Rejoice!**
+
+   If you love the raw power and control of C/C++, sego gives you that same freedom—with a Go twist.
+
+## **B. Examples**
+
+### **1. Compiling**
 
 Since sego relies on `pthread`, remember to compile with the `-pthread` flag.
 
@@ -16,7 +26,7 @@ Since sego relies on `pthread`, remember to compile with the `-pthread` flag.
 gcc -pthread SOURCE_NAME.c -o EXECUTABLE_NAME
 ```
 
-### **1. Sego Routine**
+### **2. Sego Routine**
 
 Here's how to run two simple sego routines. Note that each routine function must accept a `void *` argument and return a `void *`.
 
@@ -62,7 +72,7 @@ int main()
 }
 ```
 
-### **2. Sego Channel**
+### **3. Sego Channel**
 
 You can use **sego** channels to safely communicate between routines — just like in Go. A channel is initialized with two parameters: `itemSize` (the size of each item to send through the channel) and `bufferSize` (the capacity of the channel buffer; use 1 for an unbuffered channel).
 
@@ -131,7 +141,7 @@ int main()
 }
 ```
 
-### **3. Sego Context**
+### **4. Sego Context**
 
 Contexts in **sego** work a bit differently from those in Go. In **sego**, a context acts more like a flag and can be used for various signaling purposes.
 
@@ -173,7 +183,7 @@ int main()
 }
 ```
 
-### **4. Sego Select**
+### **5. Sego Select**
 
 Just like in Go, **sego** select can be used to wait for incoming data from a channel or a signal from a context.
 
