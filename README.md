@@ -164,6 +164,9 @@ int main()
     else
         printf("Flag is raised\n");
 
+    // destroys the context
+    sgContextDestroy(ctx);
+
     // sego handler close
     sgClose();
     return 0;
