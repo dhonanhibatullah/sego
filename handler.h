@@ -35,7 +35,7 @@ extern "C"
     /*
      * @brief   Adds new routine to the table.
      * @param   id the thread ID
-     * @return  none
+     * @return  None.
      */
     void sgHandlerAddRoutine(pthread_t id)
     {
@@ -48,7 +48,7 @@ extern "C"
     /*
      * @brief   Finds routine from the table.
      * @param   id the thread ID
-     * @return  the hash
+     * @return  The hash.
      */
     sgRoutineHash *sgHandlerFindRoutine(pthread_t id)
     {
@@ -60,7 +60,7 @@ extern "C"
     /*
      * @brief   Removes routine from the table.
      * @param   id the thread ID
-     * @return  none
+     * @return  None.
      */
     void sgHandlerRemoveRoutine(pthread_t id)
     {
@@ -75,7 +75,7 @@ extern "C"
     /*
      * @brief   Terminates all routines inside the table.
      * @param   none
-     * @return  none
+     * @return  None.
      */
     void sgHandlerTerminateRoutines()
     {
@@ -98,7 +98,7 @@ extern "C"
     /*
      * @brief   Wraps the routine function to fit the sego handler scheme.
      * @param   a the routine argument
-     * @return  a void pointer
+     * @return  A void pointer.
      */
     void *__sgRoutineWrapper(void *a)
     {
@@ -115,7 +115,7 @@ extern "C"
     /*
      * @brief   Handles all the sego routines. This runs in the background after `sgInit()`.
      * @param   arg the routine argument
-     * @return  a void pointer
+     * @return  A void pointer.
      */
     void *sgHandlerRoutine(void *arg)
     {

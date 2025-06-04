@@ -10,7 +10,6 @@ extern "C"
 #include <errno.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/select.h>
 #include "enums.h"
 #include "queue.h"
 
@@ -26,7 +25,7 @@ extern "C"
      * @brief   Makes new channel.
      * @param   itemSize the item of the transported data in the channel
      * @param   bufferSize the channel's buffer size
-     * @return  the pointer to the channel instance
+     * @return  The pointer to the channel (`sgChan`) instance.
      */
     sgChan *sgChanMake(size_t itemSize, size_t bufferSize)
     {
@@ -71,7 +70,7 @@ extern "C"
     /*
      * @brief   Pushes a value to the pipe
      * @param   ch the channel instance
-     * @return  none
+     * @return  None.
      */
     void __sgChanPipePush(sgChan *ch)
     {
@@ -82,7 +81,7 @@ extern "C"
     /*
      * @brief   Pops a value to the pipe
      * @param   ch the channel instance
-     * @return  none
+     * @return  None.
      */
     void __sgChanPipePop(sgChan *ch)
     {
@@ -193,7 +192,7 @@ extern "C"
     /*
      * @brief   Destroys the channel instance.
      * @param   ch the channel instance
-     * @return  none
+     * @return  None.
      */
     void sgChanDestroy(sgChan *ch)
     {

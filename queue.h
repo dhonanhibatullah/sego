@@ -30,7 +30,7 @@ extern "C"
      * @brief   Creates a queue with fixed item size.
      * @param   itemSize the size for each item
      * @param   bufferSize the size of the queue
-     * @return  the pointer to the queue (`sgQueue`) instance
+     * @return  The pointer to the queue (`sgQueue`) instance.
      * @note    If the queue is full when a new item is being queued, the earliest one gets dequeued.
      */
     sgQueue *sgQueueCreate(size_t itemSize, size_t bufferSize)
@@ -136,7 +136,7 @@ extern "C"
     /*
      * @brief   Destroys the queue instance.
      * @param   q the queue instance
-     * @return  none
+     * @return  None.
      */
     void sgQueueDestroy(sgQueue *q)
     {

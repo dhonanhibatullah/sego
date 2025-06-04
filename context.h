@@ -21,7 +21,7 @@ extern "C"
     /*
      * @brief   Creates new context.
      * @param   none
-     * @return  the pointer to the context (`sgContext`) instance
+     * @return  The pointer to the context (`sgContext`) instance.
      */
     sgContext *sgContextCreate()
     {
@@ -92,7 +92,7 @@ extern "C"
     /*
      * @brief   Destroys the context instance.
      * @param   ctx the context instance
-     * @return  none
+     * @return  None.
      */
     void sgContextDestroy(sgContext *ctx)
     {
@@ -113,7 +113,7 @@ extern "C"
     /*
      * @brief   Context's flag toggling routine.
      * @param   a the routine argument
-     * @return  a void pointer
+     * @return  A void pointer.
      */
     void *__sgContextToggleAfterRoutine(void *a)
     {
