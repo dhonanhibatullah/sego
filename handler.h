@@ -26,7 +26,7 @@ extern "C"
     {
         sgChan *startCh;
         sgChan *stopCh;
-        sgChan *closeCh;
+        sgContext *closeCtx;
         sgRoutineHash *table;
         pthread_t sgHandlerThread;
     } sgHandler;
@@ -102,13 +102,12 @@ extern "C"
      */
     void *__sgRoutineWrapper(void *a)
     {
-        pthread_t id = ((__sgRoutineWrapperArgs *)a)->id;
-        sgRoutine fn = ((__sgRoutineWrapperArgs *)a)->fn;
-        void *arg = ((__sgRoutineWrapperArgs *)a)->arg;
+        __sgRoutineWrapperArgs *args = (__sgRoutineWrapperArgs *)a;
 
-        fn(arg);
-        sgChanIn(sgh->stopCh, &id);
+        args->fn(args->arg);
+        sgChanIn(sgh->stopCh, &args->id);
 
+        free(args);
         return NULL;
     }
 
@@ -119,29 +118,31 @@ extern "C"
      */
     void *sgHandlerRoutine(void *arg)
     {
-        __sgRoutineWrapperArgs startChBuf;
-        pthread_t stopChBuf;
-        uint8_t closeChBuf;
-
         while (1)
         {
-            if (sgChanOutTimed(sgh->startCh, &startChBuf, 25L * SG_TIME_MS) == SG_OK)
-            {
-                pthread_create(&startChBuf.id, NULL, __sgRoutineWrapper, (void *)&startChBuf);
-                sgHandlerAddRoutine(startChBuf.id);
-            }
-            if (sgChanOutTimed(sgh->stopCh, &stopChBuf, 25L * SG_TIME_MS) == SG_OK)
-            {
-                pthread_join(stopChBuf, NULL);
-                sgHandlerRemoveRoutine(stopChBuf);
-            }
-            if (sgChanOutTimed(sgh->closeCh, &closeChBuf, 25L * SG_TIME_MS) == SG_OK)
+            sgSel sel = sgSelectWithContext(1, 2, sgh->closeCtx, sgh->startCh, sgh->stopCh);
+
+            if (sel == (sgSel)sgh->closeCtx)
             {
                 sgHandlerTerminateRoutines();
                 sgChanDestroy(sgh->startCh);
                 sgChanDestroy(sgh->stopCh);
-                sgChanDestroy(sgh->closeCh);
+                sgContextDestroy(sgh->closeCtx);
                 break;
+            }
+            else if (sel == (sgSel)sgh->startCh)
+            {
+                __sgRoutineWrapperArgs *buf = (__sgRoutineWrapperArgs *)malloc(sizeof(__sgRoutineWrapperArgs));
+                sgChanOut(sgh->startCh, buf);
+                pthread_create(&buf->id, NULL, __sgRoutineWrapper, (void *)buf);
+                sgHandlerAddRoutine(buf->id);
+            }
+            else if (sel == (sgSel)sgh->stopCh)
+            {
+                pthread_t buf;
+                sgChanOut(sgh->stopCh, &buf);
+                pthread_join(buf, NULL);
+                sgHandlerRemoveRoutine(buf);
             }
         }
     }
