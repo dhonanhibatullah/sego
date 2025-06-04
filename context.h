@@ -16,12 +16,13 @@ extern "C"
     {
         pthread_mutex_t lock;
         sgContextFlag flag;
+        int fd[2];
     } sgContext;
 
     /*
      * @brief   Creates new context.
      * @param   none
-     * @return  the pointer to the context (`sgContext`) instance
+     * @return  The pointer to the context (`sgContext`) instance.
      */
     sgContext *sgContextCreate()
     {
@@ -35,8 +36,37 @@ extern "C"
             return NULL;
         }
 
+        if (pipe(ctx->fd) == -1)
+        {
+            pthread_mutex_destroy(&ctx->lock);
+            free(ctx);
+            return NULL;
+        }
+
         ctx->flag = SG_CTX_LOWERED;
         return ctx;
+    }
+
+    /*
+     * @brief   Pushes a value to the pipe
+     * @param   ctx the context instance
+     * @return  None.
+     */
+    void __sgContextPipePush(sgContext *ctx)
+    {
+        static uint8_t val = 0xFF;
+        write(ctx->fd[1], &val, 1);
+    }
+
+    /*
+     * @brief   Pops a value to the pipe
+     * @param   ctx the context instance
+     * @return  None.
+     */
+    void __sgContextPipePop(sgContext *ctx)
+    {
+        static uint8_t tmp;
+        read(ctx->fd[0], &tmp, 1);
     }
 
     /*
@@ -50,7 +80,11 @@ extern "C"
             return SG_ERR_NULLPTR;
 
         pthread_mutex_lock(&ctx->lock);
-        ctx->flag = SG_CTX_RAISED;
+        if (ctx->flag != SG_CTX_RAISED)
+        {
+            ctx->flag = SG_CTX_RAISED;
+            __sgContextPipePush(ctx);
+        }
         pthread_mutex_unlock(&ctx->lock);
 
         return SG_OK;
@@ -67,7 +101,11 @@ extern "C"
             return SG_ERR_NULLPTR;
 
         pthread_mutex_lock(&ctx->lock);
-        ctx->flag = SG_CTX_LOWERED;
+        if (ctx->flag != SG_CTX_LOWERED)
+        {
+            ctx->flag = SG_CTX_LOWERED;
+            __sgContextPipePop(ctx);
+        }
         pthread_mutex_unlock(&ctx->lock);
 
         return SG_OK;
@@ -92,7 +130,7 @@ extern "C"
     /*
      * @brief   Destroys the context instance.
      * @param   ctx the context instance
-     * @return  none
+     * @return  None.
      */
     void sgContextDestroy(sgContext *ctx)
     {
@@ -113,7 +151,7 @@ extern "C"
     /*
      * @brief   Context's flag toggling routine.
      * @param   a the routine argument
-     * @return  a void pointer
+     * @return  A void pointer.
      */
     void *__sgContextToggleAfterRoutine(void *a)
     {

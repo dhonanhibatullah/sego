@@ -9,6 +9,7 @@ extern "C"
 #include <pthread.h>
 #include <errno.h>
 #include <time.h>
+#include <unistd.h>
 #include "enums.h"
 #include "queue.h"
 
@@ -17,13 +18,14 @@ extern "C"
         pthread_mutex_t lock;
         pthread_cond_t cond;
         sgQueue *queue;
+        int fd[2];
     } sgChan;
 
     /*
      * @brief   Makes new channel.
      * @param   itemSize the item of the transported data in the channel
      * @param   bufferSize the channel's buffer size
-     * @return  the pointer to the channel instance
+     * @return  The pointer to the channel (`sgChan`) instance.
      */
     sgChan *sgChanMake(size_t itemSize, size_t bufferSize)
     {
@@ -53,7 +55,38 @@ extern "C"
             return NULL;
         }
 
+        if (pipe(ch->fd) == -1)
+        {
+            pthread_mutex_destroy(&ch->lock);
+            pthread_cond_destroy(&ch->cond);
+            sgQueueDestroy(ch->queue);
+            free(ch);
+            return NULL;
+        }
+
         return ch;
+    }
+
+    /*
+     * @brief   Pushes a value to the pipe
+     * @param   ch the channel instance
+     * @return  None.
+     */
+    void __sgChanPipePush(sgChan *ch)
+    {
+        static uint8_t val = 0xFF;
+        write(ch->fd[1], &val, 1);
+    }
+
+    /*
+     * @brief   Pops a value to the pipe
+     * @param   ch the channel instance
+     * @return  None.
+     */
+    void __sgChanPipePop(sgChan *ch)
+    {
+        static uint8_t tmp;
+        read(ch->fd[0], &tmp, 1);
     }
 
     /*
@@ -71,6 +104,11 @@ extern "C"
 
         sgReturnType ret = sgQueueQueue(ch->queue, data);
         if (ret == SG_OK)
+        {
+            pthread_cond_signal(&ch->cond);
+            __sgChanPipePush(ch);
+        }
+        else if (ret == SG_QUEUE_FULL)
             pthread_cond_signal(&ch->cond);
 
         pthread_mutex_unlock(&ch->lock);
@@ -94,7 +132,10 @@ extern "C"
 
         while (ch->queue->waiting == 0)
             pthread_cond_wait(&ch->cond, &ch->lock);
+
         sgReturnType ret = sgQueueDequeue(ch->queue, buf);
+        if (ret == SG_OK)
+            __sgChanPipePop(ch);
 
         pthread_mutex_unlock(&ch->lock);
 
@@ -140,6 +181,8 @@ extern "C"
             }
         }
         sgReturnType ret = sgQueueDequeue(ch->queue, buf);
+        if (ret == SG_OK)
+            __sgChanPipePop(ch);
 
         pthread_mutex_unlock(&ch->lock);
 
@@ -149,7 +192,7 @@ extern "C"
     /*
      * @brief   Destroys the channel instance.
      * @param   ch the channel instance
-     * @return  none
+     * @return  None.
      */
     void sgChanDestroy(sgChan *ch)
     {
@@ -159,6 +202,8 @@ extern "C"
         sgQueueDestroy(ch->queue);
         pthread_mutex_destroy(&ch->lock);
         pthread_cond_destroy(&ch->cond);
+        close(ch->fd[0]);
+        close(ch->fd[1]);
         free(ch);
     }
 

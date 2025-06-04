@@ -164,15 +164,95 @@ int main()
     else
         printf("Flag is raised\n");
 
+    // destroys the context
+    sgContextDestroy(ctx);
+
     // sego handler close
     sgClose();
     return 0;
 }
 ```
 
-## **B. To be Developed**
+### **4. Sego Select**
 
-1. windows support
-2. `select {}` mechanism
-3. many other Go features
-4. libraries based on **sego** for building apps
+Just like in Go, **sego** select can be used to wait for incoming data from a channel or a signal from a context.
+
+```c
+#include <stdio.h>
+#include "sego.h"
+
+// define the argument for the routine
+typedef struct
+{
+    sgChan *ch;
+    sgContext *ctx;
+} senderArgs;
+
+// sender sego routine function
+void *sender(void *arg)
+{
+    // casts the argument into channel and context
+    sgChan *ch = ((senderArgs *)arg)->ch;
+    sgContext *ctx = ((senderArgs *)arg)->ctx;
+
+    // send messages
+    char msg[32];
+    for (uint8_t i = 0; i < 20; ++i)
+    {
+        // creates and sends the message
+        snprintf(msg, 32, "Counter : %02u", i);
+        sgChanIn(ch, msg);
+
+        // gives the CPU some time to sleep
+        sgMomentSleep(30L * SG_TIME_MS);
+    }
+
+    // raises the context to stop the select in main()
+    sgContextRaise(ctx);
+
+    // closes the context and channels
+    sgChanDestroy(ch);
+    sgContextDestroy(ctx);
+}
+
+int main()
+{
+    // sego handler init
+    sgInit();
+
+    // creates a channel and a context
+    sgChan *ch = sgChanMake(sizeof(char[32]), 1);
+    sgContext *ctx = sgContextCreate();
+
+    // passes the channel and the context to the routine
+    senderArgs args = {
+        .ch = ch,
+        .ctx = ctx};
+
+    // runs the routine
+    sego(sender, &args);
+
+    // receives the messages via select
+    char buf[32];
+    while (1)
+    {
+        // selects from 1 context and 1 channel
+        sgSel sel = sgSelectWithContext(1, 1, ctx, ch);
+
+        if (sel == (sgSel)ctx)
+        {
+            printf("Context raised, terminating...\n");
+            break;
+        }
+        else if (sel == (sgSel)ch)
+        {
+            sgChanOut(ch, buf);
+            printf("Channel -> %s\n", buf);
+        }
+    }
+
+    // sego handler close
+    sgClose();
+    return 0;
+}
+```
