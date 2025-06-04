@@ -58,11 +58,15 @@ extern "C"
      */
     sgReturnType sgQueueQueue(sgQueue *q, void *data)
     {
+        uint8_t isFull = 0x00;
+
         if (q == NULL || data == NULL)
             return SG_ERR_NULLPTR;
 
         if (q->waiting == q->bufferSize)
         {
+            isFull = 0x01;
+
             sgQueueItem *prevHead = q->head;
             q->head = q->head->next;
 
@@ -99,7 +103,7 @@ extern "C"
         }
 
         q->waiting += 1;
-        return SG_OK;
+        return (isFull) ? SG_QUEUE_FULL : SG_OK;
     }
 
     /*
