@@ -10,6 +10,8 @@ extern "C"
 #include "uthash.h"
 #include "enums.h"
 #include "channel.h"
+#include "context.h"
+#include "select.h"
 
 #include <stdio.h>
 
@@ -20,26 +22,26 @@ extern "C"
         pthread_t id;
         uint8_t sts;
         UT_hash_handle hh;
-    } sgRoutineHash;
+    } __sgRoutineHash;
 
     typedef struct
     {
         sgChan *startCh;
         sgChan *stopCh;
         sgContext *closeCtx;
-        sgRoutineHash *table;
+        __sgRoutineHash *table;
         pthread_t sgHandlerThread;
-    } sgHandler;
-    extern sgHandler *sgh;
+    } __sgHandler;
+    extern __sgHandler *sgh;
 
     /*
      * @brief   Adds new routine to the table.
      * @param   id the thread ID
      * @return  None.
      */
-    void sgHandlerAddRoutine(pthread_t id)
+    void __sgHandlerAddRoutine(pthread_t id)
     {
-        sgRoutineHash *r = (sgRoutineHash *)malloc(sizeof(sgRoutineHash));
+        __sgRoutineHash *r = (__sgRoutineHash *)malloc(sizeof(__sgRoutineHash));
         r->id = id;
         r->sts = 0x00;
         HASH_ADD_INT(sgh->table, id, r);
@@ -50,9 +52,9 @@ extern "C"
      * @param   id the thread ID
      * @return  The hash.
      */
-    sgRoutineHash *sgHandlerFindRoutine(pthread_t id)
+    __sgRoutineHash *__sgHandlerFindRoutine(pthread_t id)
     {
-        sgRoutineHash *r;
+        __sgRoutineHash *r;
         HASH_FIND_INT(sgh->table, &id, r);
         return r;
     }
@@ -62,9 +64,9 @@ extern "C"
      * @param   id the thread ID
      * @return  None.
      */
-    void sgHandlerRemoveRoutine(pthread_t id)
+    void __sgHandlerRemoveRoutine(pthread_t id)
     {
-        sgRoutineHash *r = sgHandlerFindRoutine(id);
+        __sgRoutineHash *r = __sgHandlerFindRoutine(id);
         if (r)
         {
             HASH_DEL(sgh->table, r);
@@ -77,9 +79,9 @@ extern "C"
      * @param   none
      * @return  None.
      */
-    void sgHandlerTerminateRoutines()
+    void __sgHandlerTerminateRoutines()
     {
-        sgRoutineHash *r, *tmp;
+        __sgRoutineHash *r, *tmp;
         HASH_ITER(hh, sgh->table, r, tmp)
         {
             pthread_cancel(r->id);
@@ -116,7 +118,7 @@ extern "C"
      * @param   arg the routine argument
      * @return  A void pointer.
      */
-    void *sgHandlerRoutine(void *arg)
+    void *__sgHandlerRoutine(void *arg)
     {
         while (1)
         {
@@ -124,7 +126,7 @@ extern "C"
 
             if (sel == (sgSel)sgh->closeCtx)
             {
-                sgHandlerTerminateRoutines();
+                __sgHandlerTerminateRoutines();
                 sgChanDestroy(sgh->startCh);
                 sgChanDestroy(sgh->stopCh);
                 sgContextDestroy(sgh->closeCtx);
@@ -135,14 +137,14 @@ extern "C"
                 __sgRoutineWrapperArgs *buf = (__sgRoutineWrapperArgs *)malloc(sizeof(__sgRoutineWrapperArgs));
                 sgChanOut(sgh->startCh, buf);
                 pthread_create(&buf->id, NULL, __sgRoutineWrapper, (void *)buf);
-                sgHandlerAddRoutine(buf->id);
+                __sgHandlerAddRoutine(buf->id);
             }
             else if (sel == (sgSel)sgh->stopCh)
             {
                 pthread_t buf;
                 sgChanOut(sgh->stopCh, &buf);
                 pthread_join(buf, NULL);
-                sgHandlerRemoveRoutine(buf);
+                __sgHandlerRemoveRoutine(buf);
             }
         }
     }
