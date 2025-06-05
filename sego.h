@@ -16,7 +16,7 @@ extern "C"
 #include "moment.h"
 #include "handler.h"
 
-    sgHandler *sgh;
+    __sgHandler *sgh;
 
     /*
      * @brief   Starts sego handler.
@@ -25,7 +25,7 @@ extern "C"
      */
     void sgInit()
     {
-        sgh = (sgHandler *)malloc(sizeof(sgHandler));
+        sgh = (__sgHandler *)malloc(sizeof(__sgHandler));
         if (sgh == NULL)
         {
             perror("Failed to allocate memory for Sego handler.");
@@ -61,7 +61,7 @@ extern "C"
 
         sgh->table = NULL;
 
-        if (pthread_create(&sgh->sgHandlerThread, NULL, sgHandlerRoutine, NULL) != 0)
+        if (pthread_create(&sgh->sgHandlerThread, NULL, __sgHandlerRoutine, NULL) != 0)
         {
             sgChanDestroy(sgh->startCh);
             sgChanDestroy(sgh->stopCh);
