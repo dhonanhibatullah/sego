@@ -6,8 +6,6 @@ extern "C"
 {
 #endif
 
-#include <errno.h>
-#include <pthread.h>
 #include "enums.h"
 #include "queue.h"
 #include "channel.h"
