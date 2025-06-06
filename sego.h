@@ -93,6 +93,9 @@ extern "C"
      */
     void sego(sgRoutine fn, void *arg)
     {
+        if (fn == NULL)
+            return;
+
         __sgRoutineWrapperArgs args;
         args.fn = fn;
         args.arg = arg;
