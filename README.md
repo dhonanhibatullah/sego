@@ -40,7 +40,7 @@ void *routine1(void *arg)
     for (uint8_t i = 0; i < 20; ++i)
     {
         printf("[ R1 ] Counter: %u\n", i);
-        sgMomentSleep(170L * SG_TIME_MS);
+        sgMomentSleep(170LL * SG_TIME_MS);
     }
 }
 
@@ -50,7 +50,7 @@ void *routine2(void *arg)
     for (uint8_t i = 0; i < 10; ++i)
     {
         printf("[ R2 ] Counter: %u\n", i);
-        sgMomentSleep(300L * SG_TIME_MS);
+        sgMomentSleep(300LL * SG_TIME_MS);
     }
 }
 
@@ -64,7 +64,7 @@ int main()
     sego(routine2, NULL);
 
     // waits until sego routines are completed
-    sgMomentSleep(3500L * SG_TIME_MS);
+    sgMomentSleep(3500LL * SG_TIME_MS);
 
     // sego handler close
     sgClose();
@@ -95,7 +95,7 @@ void *sender(void *arg)
         sgChanIn(ch, msg);
 
         // gives the CPU some time to sleep
-        sgMomentSleep(500L * SG_TIME_MS);
+        sgMomentSleep(500LL * SG_TIME_MS);
     }
 
     // closes the channel
@@ -133,7 +133,7 @@ int main()
     sego(receiver, ch);
 
     // waits until sego routines are completed
-    sgMomentSleep(2500L * SG_TIME_MS);
+    sgMomentSleep(2500LL * SG_TIME_MS);
 
     // sego handler close
     sgClose();
@@ -158,17 +158,17 @@ int main()
     sgContext *ctx = sgContextCreate();
 
     // raises after 2s
-    sgContextRaiseAfter(ctx, 2L * SG_TIME_S);
+    sgContextRaiseAfter(ctx, 2LL * SG_TIME_S);
 
     // checks after 1s
-    sgMomentSleep(1L * SG_TIME_S);
+    sgMomentSleep(1LL * SG_TIME_S);
     if (sgContextGetFlag(ctx) != SG_CTX_RAISED)
         printf("Still lowered after 1s\n");
     else
         printf("NANI?! how is that even possible?\n");
 
     // checks after 3s
-    sgMomentSleep(2L * SG_TIME_S);
+    sgMomentSleep(2LL * SG_TIME_S);
     if (sgContextGetFlag(ctx) != SG_CTX_RAISED)
         printf("There is no way...\n");
     else
@@ -214,7 +214,7 @@ void *sender(void *arg)
         sgChanIn(ch, msg);
 
         // gives the CPU some time to sleep
-        sgMomentSleep(30L * SG_TIME_MS);
+        sgMomentSleep(30LL * SG_TIME_MS);
     }
 
     // raises the context to stop the select in main()
@@ -288,14 +288,14 @@ int main()
 
     // creates the timer
     sgMomentTimer *t = sgMomentTimerCreate(
-        1L * SG_TIME_MS,
-        300L * SG_TIME_MS,
+        1LL * SG_TIME_MS,
+        300LL * SG_TIME_MS,
         0,
         timerCallback,
         NULL);
 
     // waits and destroys
-    sgMomentSleep(2L * SG_TIME_S);
+    sgMomentSleep(2LL * SG_TIME_S);
     sgMomentTimerDestroy(t);
 
     // sego handler close
