@@ -266,3 +266,40 @@ int main()
     return 0;
 }
 ```
+
+### **6. Sego Timer**
+
+Need a time-triggered event? Let the **sego** timer handles it!
+
+```c
+#include <stdio.h>
+#include "sego.h"
+
+// defines the timer callback
+void timerCallback(void *args)
+{
+    printf("Hello from timer!\n");
+}
+
+int main()
+{
+    // sego handler init
+    sgInit();
+
+    // creates the timer
+    sgMomentTimer *t = sgMomentTimerCreate(
+        1L * SG_TIME_MS,
+        300L * SG_TIME_MS,
+        0,
+        timerCallback,
+        NULL);
+
+    // waits and destroys
+    sgMomentSleep(2L * SG_TIME_S);
+    sgMomentTimerDestroy(t);
+
+    // sego handler close
+    sgClose();
+    return 0;
+}
+```
