@@ -6,6 +6,8 @@ extern "C"
 {
 #endif
 
+#include <stdlib.h>
+#include <stdint.h>
 #include <signal.h>
 #include <time.h>
 #include "enums.h"
@@ -18,7 +20,7 @@ extern "C"
      * @return  none
      * @note    Multiply the time with the desired time unit, e.g. 500L * `SG_TIME_MS` for 500ms sleep.
      */
-    void sgMomentSleep(long time)
+    void sgMomentSleep(int64_t time)
     {
         struct timespec ts = {
             .tv_sec = time / SG_TIME_S,
@@ -106,6 +108,90 @@ extern "C"
     {
         timer_delete(timer->id);
         free(timer);
+    }
+
+    /*
+     * @brief   Retrieves current UNIX timestamp (seconds precision).
+     * @param   none
+     * @return  The UNIX timestamp.
+     */
+    int64_t sgMomentNowUnix()
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        return (int64_t)ts.tv_sec;
+    }
+
+    /*
+     * @brief   Retrieves current UNIX timestamp (milliseconds precision).
+     * @param   none
+     * @return  The UNIX timestamp.
+     */
+    int64_t sgMomentNowUnixMillis()
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        return (int64_t)(ts.tv_sec * 1000LL + ts.tv_nsec / 1000000LL);
+    }
+
+    /*
+     * @brief   Retrieves current UNIX timestamp (microseconds precision).
+     * @param   none
+     * @return  The UNIX timestamp.
+     */
+    int64_t sgMomentNowUnixMicros()
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        return (int64_t)(ts.tv_sec * 1000000LL + ts.tv_nsec / 1000LL);
+    }
+
+    /*
+     * @brief   Retrieves current UNIX timestamp (nanoseconds precision).
+     * @param   none
+     * @return  The UNIX timestamp.
+     */
+    int64_t sgMomentNowUnixNanos()
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        return (int64_t)(ts.tv_sec * 1000000000LL + ts.tv_nsec);
+    }
+
+    typedef struct
+    {
+        int year;
+        int month;
+        int day;
+        int hour;
+        int minute;
+        int second;
+        int wday;
+        int yday;
+        int isdst;
+    } sgMomentDateTime;
+
+    /*
+     * @brief   Retrieves local date and time.
+     * @param   none
+     * @return  Datetime data.
+     */
+    sgMomentDateTime sgMomentNowDateTime()
+    {
+        time_t now = time(NULL);
+        struct tm *lt = localtime(&now);
+        sgMomentDateTime dt = {
+            .year = lt->tm_year + 1990,
+            .month = lt->tm_mon + 1,
+            .day = lt->tm_mday,
+            .hour = lt->tm_hour,
+            .minute = lt->tm_min,
+            .second = lt->tm_sec,
+            .wday = lt->tm_wday,
+            .yday = lt->tm_yday,
+            .isdst = lt->tm_isdst};
+
+        return dt;
     }
 
 #ifdef __cplusplus
