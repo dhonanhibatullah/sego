@@ -6,6 +6,8 @@ extern "C"
 {
 #endif
 
+#include <stdlib.h>
+#include <stdint.h>
 #include <signal.h>
 #include <time.h>
 #include "enums.h"
