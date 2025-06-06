@@ -7,8 +7,10 @@ extern "C"
 #endif
 
 #include <pthread.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <signal.h>
 #include <time.h>
 #include "enums.h"
 
@@ -145,7 +147,6 @@ extern "C"
     {
         uint8_t raise;
         sgContext *ctx;
-        struct timespec ts;
     } __sgContextToggleAfterArgs;
 
     /*
@@ -153,18 +154,16 @@ extern "C"
      * @param   a the routine argument
      * @return  A void pointer.
      */
-    void *__sgContextToggleAfterRoutine(void *a)
+    void __sgContextToggleAfterHandler(union sigval sv)
     {
-        __sgContextToggleAfterArgs *args = (__sgContextToggleAfterArgs *)a;
+        __sgContextToggleAfterArgs *args = (__sgContextToggleAfterArgs *)sv.sival_ptr;
 
-        nanosleep(&args->ts, NULL);
         if (args->raise)
             sgContextRaise(args->ctx);
         else
             sgContextLower(args->ctx);
 
         free(args);
-        return NULL;
     }
 
     /*
@@ -185,15 +184,21 @@ extern "C"
 
         args->raise = 0x01;
         args->ctx = ctx;
-        args->ts.tv_sec = time / SG_TIME_S;
-        args->ts.tv_nsec = time % SG_TIME_S;
 
-        pthread_t tid;
-        if (pthread_create(&tid, NULL, __sgContextToggleAfterRoutine, (void *)args) != 0)
-        {
-            free(args);
-            return SG_ERR_PTHREAD;
-        }
+        struct sigevent sev = {0};
+        sev.sigev_notify = SIGEV_THREAD;
+        sev.sigev_notify_function = __sgContextToggleAfterHandler;
+        sev.sigev_value.sival_ptr = args;
+
+        timer_t timerId;
+        timer_create(CLOCK_REALTIME, &sev, &timerId);
+
+        struct itimerspec its = {0};
+        its.it_value.tv_sec = time / SG_TIME_S;
+        its.it_value.tv_nsec = time % SG_TIME_S;
+        its.it_interval.tv_sec = 0;
+        its.it_interval.tv_nsec = 0;
+        timer_settime(timerId, 0, &its, NULL);
 
         return SG_OK;
     }
@@ -216,15 +221,21 @@ extern "C"
 
         args->raise = 0x00;
         args->ctx = ctx;
-        args->ts.tv_sec = time / SG_TIME_S;
-        args->ts.tv_nsec = time % SG_TIME_S;
 
-        pthread_t tid;
-        if (pthread_create(&tid, NULL, __sgContextToggleAfterRoutine, (void *)args) != 0)
-        {
-            free(args);
-            return SG_ERR_PTHREAD;
-        }
+        struct sigevent sev = {0};
+        sev.sigev_notify = SIGEV_THREAD;
+        sev.sigev_notify_function = __sgContextToggleAfterHandler;
+        sev.sigev_value.sival_ptr = args;
+
+        timer_t timerId;
+        timer_create(CLOCK_REALTIME, &sev, &timerId);
+
+        struct itimerspec its = {0};
+        its.it_value.tv_sec = time / SG_TIME_S;
+        its.it_value.tv_nsec = time % SG_TIME_S;
+        its.it_interval.tv_sec = 0;
+        its.it_interval.tv_nsec = 0;
+        timer_settime(timerId, 0, &its, NULL);
 
         return SG_OK;
     }
