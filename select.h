@@ -9,6 +9,7 @@ extern "C"
 #include <stdio.h>
 #include <stdarg.h>
 #include <poll.h>
+#include "context.h"
 #include "channel.h"
 
     typedef uint64_t sgSel;
