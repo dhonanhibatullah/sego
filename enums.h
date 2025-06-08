@@ -14,7 +14,8 @@ extern "C"
         SG_QUEUE_FULL,
         SG_ERR_NULLPTR,
         SG_ERR_ALLOC,
-        SG_ERR_PTHREAD
+        SG_ERR_PTHREAD,
+        SG_ERR_INVALID
     } sgReturnType;
 
     typedef enum
