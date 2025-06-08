@@ -25,6 +25,11 @@ extern "C"
         sgMapEntry *hash;
     } sgMapStr;
 
+    /*
+     * @brief   Creates new string-keyed map instance.
+     * @param   none
+     * @return  The pointer to the string-keyed map instance.
+     */
     sgMapStr *sgMapStrCreate()
     {
         sgMapStr *map = (sgMapStr *)malloc(sizeof(sgMapStr));
@@ -32,6 +37,14 @@ extern "C"
         return map;
     }
 
+    /*
+     * @brief   Adds new entry to the map.
+     * @param   map the string map pointer
+     * @param   key the key
+     * @param   val the pointer to the value
+     * @param   valSize the size of the value
+     * @return  `SG_ERR_NULLPTR` if an argument is a `NULL`. `SG_ERR_ALLOC` when allocation is failed. `SG_OK` when successfully added.
+     */
     sgReturnType sgMapStrAdd(sgMapStr *map, const char *key, void *val, size_t valSize)
     {
         if (map == NULL || key == NULL || val == NULL)
@@ -54,6 +67,12 @@ extern "C"
         return SG_OK;
     }
 
+    /*
+     * @brief   Seeks or checks for existence of a key.
+     * @param   map the string map pointer
+     * @param   key the desired key
+     * @return  The size of the value stored within the key. Returns `0` if the key does not exist.
+     */
     size_t sgMapStrSeek(sgMapStr *map, const char *key)
     {
         if (map == NULL || key == NULL)
@@ -68,6 +87,13 @@ extern "C"
             return e->valSize;
     }
 
+    /*
+     * @brief   Finds the value corresponded with the key.
+     * @param   map the string map pointer
+     * @param   key the desired key
+     * @param   buf the buffer to hold the value
+     * @return  `SG_ERR_NULLPTR` if an argument is a `NULL`. `SG_NOTHING` if the finding failed. `SG_OK` if the value copied to the `buf`.
+     */
     sgReturnType sgMapStrFind(sgMapStr *map, const char *key, void *buf)
     {
         if (map == NULL || key == NULL || buf == NULL)
@@ -83,6 +109,12 @@ extern "C"
         return SG_OK;
     }
 
+    /*
+     * @brief   Deletes an entry from the map.
+     * @param   map the string map pointer
+     * @param   key the desired key
+     * @return  `SG_ERR_NULLPTR` if an argument is a `NULL`. `SG_NOTHING` if key does not exist. `SG_OK` if the entry successfully deleted.
+     */
     sgReturnType sgMapStrDelete(sgMapStr *map, const char *key)
     {
         if (map == NULL || key == NULL)
@@ -102,6 +134,11 @@ extern "C"
         return SG_OK;
     }
 
+    /*
+     * @brief   Destroys the string map.
+     * @param   map the pointer to the map.
+     * @return  None.
+     */
     void sgMapStrDestroy(sgMapStr *map)
     {
         if (map == NULL)
