@@ -13,6 +13,7 @@ extern "C"
 #include "select.h"
 #include "moment.h"
 #include "handler.h"
+#include "map.h"
 
     __sgHandler *sgh;
 
