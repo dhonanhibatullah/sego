@@ -15,24 +15,24 @@ extern "C"
     {
         char *key;
         void *val;
-        size_t keySize;
-        size_t valSize;
         UT_hash_handle hh;
     } sgMapEntry;
 
     typedef struct
     {
+        size_t valSize;
         sgMapEntry *hash;
     } sgMapStr;
 
     /*
      * @brief   Creates new string-keyed map instance.
-     * @param   none
+     * @param   valSize the size of the value to be stored
      * @return  The pointer to the string-keyed map instance.
      */
-    sgMapStr *sgMapStrCreate()
+    sgMapStr *sgMapStrCreate(size_t valSize)
     {
         sgMapStr *map = (sgMapStr *)malloc(sizeof(sgMapStr));
+        map->valSize = valSize;
         map->hash = NULL;
         return map;
     }
@@ -42,10 +42,9 @@ extern "C"
      * @param   map the string map pointer
      * @param   key the key
      * @param   val the pointer to the value
-     * @param   valSize the size of the value
      * @return  `SG_ERR_NULLPTR` if an argument is a `NULL`. `SG_ERR_ALLOC` when allocation is failed. `SG_OK` when successfully added.
      */
-    sgReturnType sgMapStrAdd(sgMapStr *map, const char *key, void *val, size_t valSize)
+    sgReturnType sgMapStrAdd(sgMapStr *map, const char *key, void *val)
     {
         if (map == NULL || key == NULL || val == NULL)
             return SG_ERR_NULLPTR;
@@ -56,43 +55,21 @@ extern "C"
 
         size_t len = strlen(key);
         e->key = malloc(len);
-        e->val = malloc(valSize);
-        e->keySize = len;
-        e->valSize = valSize;
+        e->val = malloc(map->valSize);
 
         strcpy(e->key, key);
-        memcpy(e->val, val, valSize);
-        HASH_ADD_KEYPTR(hh, map->hash, e->key, e->keySize, e);
+        memcpy(e->val, val, map->valSize);
+        HASH_ADD_KEYPTR(hh, map->hash, e->key, len, e);
 
         return SG_OK;
-    }
-
-    /*
-     * @brief   Seeks or checks for existence of a key.
-     * @param   map the string map pointer
-     * @param   key the desired key
-     * @return  The size of the value stored within the key. Returns `0` if the key does not exist.
-     */
-    size_t sgMapStrSeek(sgMapStr *map, const char *key)
-    {
-        if (map == NULL || key == NULL)
-            return 0UL;
-
-        sgMapEntry *e = NULL;
-        HASH_FIND(hh, map->hash, key, strlen(key), e);
-
-        if (e == NULL)
-            return 0UL;
-        else
-            return e->valSize;
     }
 
     /*
      * @brief   Finds the value corresponded with the key.
      * @param   map the string map pointer
      * @param   key the desired key
-     * @param   buf the buffer to hold the value
-     * @return  `SG_ERR_NULLPTR` if an argument is a `NULL`. `SG_NOTHING` if the finding failed. `SG_OK` if the value copied to the `buf`.
+     * @param   buf the buffer to hold the value, can be set to `NULL`
+     * @return  `SG_ERR_NULLPTR` if an map/key is a `NULL`. `SG_NOTHING` if does not exist. `SG_OK` if ok.
      */
     sgReturnType sgMapStrFind(sgMapStr *map, const char *key, void *buf)
     {
@@ -105,7 +82,9 @@ extern "C"
         if (e == NULL)
             SG_NOTHING;
 
-        memcpy(buf, e->val, e->valSize);
+        if (buf != NULL)
+            memcpy(buf, e->val, map->valSize);
+
         return SG_OK;
     }
 
