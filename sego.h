@@ -8,6 +8,7 @@ extern "C"
 
 #include "enums.h"
 #include "queue.h"
+#include "list.h"
 #include "channel.h"
 #include "context.h"
 #include "select.h"
