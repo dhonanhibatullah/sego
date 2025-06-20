@@ -54,7 +54,7 @@ extern "C"
             return SG_ERR_ALLOC;
 
         size_t len = strlen(key);
-        e->key = malloc(len);
+        e->key = (char *)malloc(len);
         e->val = malloc(map->valSize);
 
         strcpy(e->key, key);
